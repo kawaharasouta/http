@@ -120,4 +120,73 @@ short short_conv(short s){
 			unsigned char b;
 		}s;
 	};i_s, i_s_ret;
+
+		i_s.i = s;
+		i_s_ret.s.a = i_s.s.b;
+		i_s_ret.s.b = i_s.s.a;
+
+	return(i_s_ret.i)
+}
+
+/**
+ * @fn ConnectHost
+ * @brief connect socket
+ * @param s 
+ * @return int soc
+ * @sa main
+ */
+int ConnectHost(char *host, char * port, int portno){
+	struct hostent *servhost;
+	struct servent *se;
+	struct sockaddr_in server;
+	int soc, p;
+
+	if((servhost = gethostbyname(host)) == NULL){
+		u_long addr;
+		addr = inet_addr(host);
+		servhost = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
+		if(servhost == NULL){
+			perror("Error:gethostbyname");
+			retunr(-1);
+		}
+	}
+	if((se = getservbyname(port, "tcp")) == NULL){}
+	if((soc = sockt(AF_INET, SOCK_STREAM, 0)) < 0){
+		perror("socket error");
+		return(-1);
+	}
+	memset((char *)&server, 0, sizeof(server));
+	server.sin_family = AF_INET;
+	if(se == NULL){
+		if((p = atoi(port)) == 0){
+			p = portno;
+		}
+#ifdef X86
+		server.sin_port = short_conv(p);
+#else
+		server.sin_port = p;
+#endif	
+	}
+	else{
+		server.sin_port = se -> s_port;
+	}
+	memcpy((char *)&server.sin_addr, servhost -> h_addr, servhost -> h_length);
+	
+	if(connect(soc, (struct sockaddr *)&server, sizeof(server)) == -1){
+		perror("connect error");
+		SocketClose(soc);
+		return(-1);
+	}
+	return(soc);
+}
+
+/**
+ * @fn SocketClose
+ * @brief close socket
+ * @param soc
+ * @return int size
+ * @sa main
+ */
+int SocketClose(int soc){
+
 }
