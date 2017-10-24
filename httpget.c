@@ -184,9 +184,60 @@ int ConnectHost(char *host, char * port, int portno){
  * @fn SocketClose
  * @brief close socket
  * @param soc
- * @return int size
+ * @return int
  * @sa main
  */
 int SocketClose(int soc){
+	int ret;
+	shutdown(soc, 2);
+	
+	 close(ret);
 
+	return(ret);
 }
+
+/**
+ * @fn SOCprintf
+ * @brief print socket
+ * @param ???
+ * @return int
+ * @sa main
+ */
+int SOCprintf(va_alist)
+va_dcl{
+	va_list args;
+	int soc;
+	char *fmt;
+	char buf[4096];
+
+	va_start(args);
+	soc = va_arg(args, int);
+	fmt = va_arg(args, char *);
+	vsprintf(buf, fmt, args);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+
+	send(soc, buf, strlen(buf), 0);
+	
+	return(0);
+}
+
+/**
+ * @fn SOCrecv
+ * @brief recv message
+ * @param socket, buf
+ * @return int size
+ * @sa main
+ */
+int SOCrecv(int soc, char *buf){
+	int size;
+
+	size = recv(soc, buf, 1024, 0);
+	buf[size] = '\0';
+
+	fprintf(stderr, ">>>>>%s\n", buf);
+
+	return(size)
+}
+
+
