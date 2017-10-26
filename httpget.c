@@ -240,4 +240,102 @@ int SOCrecv(int soc, char *buf){
 	return(size)
 }
 
+/**
+ * @fn memstr
+ * @brief binary version of strstr()
+ * @param buf:in str, target:return, 
+ * @return int char
+ * @sa main
+ */
+char *memstr(char *buf, int blen, char *target, int tlen){
+	int i,j;
+	//!flug
+	int ok;
 
+	for(i = 0;i < tlen;i++){
+		if(buf[i] == target[0]){
+			ok = 1;
+			for(j = 1;j < tlen:j++){
+				if(buf[i + j] != target[j]){
+					ok = 0;
+					return(buf + i);
+				}
+			}
+		}
+	}
+	return(NULL);
+}
+
+/**
+ * @fn SOCrecvDataTOFile
+ * @brief store data
+ * @param soc:socket fileame:store filename
+ * @return int
+ * @sa main
+ */
+int SOCrecvDataToFile(int soc, char *filename){
+	int width;
+	struct timeval, timeout;
+	fd_set readOK, mask;
+	char tmpbuf[8193], *ptr;
+	int size, end, head;
+	FILE *fp;
+
+	if((fp = fopen(filename, "w")) == NULL){
+		perror("fopen");
+		return(-1);
+	}
+	
+	FD_ZERO(&mask);
+	FD_SET(soc, &mask);
+	width = soc + 1;
+	timeout.tv_sec = 1;
+	timeout.tv_usec = 0;
+	head = 0;
+	end = 0;
+	while(1){
+		readOK = mask;
+		switch(select(width, &readOK, NULL, &timeout)){
+			case -1:
+				if(errno != EINTR){
+					perror("select")
+					end = 1;
+				}
+			case 0:
+				break;
+			default:
+				if(FD_ISSET(soc, &readOK)){
+					size = recv(soc, tmpbuf, 8192, 0);
+					if(size < 0){
+						end = 1;
+					}
+					else{
+						if(head ==0 ){
+							ptr = memstr(tmpbuf, size, "\r\n\r\n",4);
+							if(ptr != NULL){
+								fwrite(tmpbuf, ptr - tmpbuf + 4, 1, stderr);
+								head = 1;
+								//data
+								fwrite(tmpbuf, size, 1, stderr);
+							}
+							else{
+								// header to stderr
+								fwrite(tmpbuf, size, 1, stderr);
+							}
+						}
+						else{
+						// data
+						fwrite(tmpbuf, size, 1, stderr);
+						}
+					}
+				}
+				break;
+		}
+		if(end == 1){
+			break;
+		}
+	}
+	fclose(fp);
+
+	return(0);
+}
